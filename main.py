@@ -131,5 +131,5 @@ class DiffAlerterApp:
 
 # Create the Tkinter app
 root = tk.Tk()
-app = WebsiteMonitorApp(root)
+app = DiffAlerterApp(root)
 root.mainloop()
