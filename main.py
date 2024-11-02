@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox
 import requests
-import hashlib
 import json
 from bs4 import BeautifulSoup
 from threading import Thread
+from datetime import datetime
 
-class DiffAlerterApp:
+class WebsiteMonitorApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Website Change Monitor")
@@ -16,6 +16,9 @@ class DiffAlerterApp:
         
         # Create UI components
         self.create_widgets()
+        
+        # Populate Listbox with loaded data
+        self.populate_listbox()
 
     def create_widgets(self):
         # URL Entry and Add Button
@@ -37,7 +40,7 @@ class DiffAlerterApp:
         add_button.pack()
 
         # Listbox to display URLs
-        self.url_listbox = tk.Listbox(self.root, width=50, height=10)
+        self.url_listbox = tk.Listbox(self.root, width=70, height=10)
         self.url_listbox.pack(pady=10)
 
         # Check Changes Button
@@ -68,8 +71,15 @@ class DiffAlerterApp:
         url = self.url_entry.get().strip()
         selector = self.selector_entry.get().strip()
         if url and selector and url != "Enter URL" and selector != "Enter CSS Selector (e.g., #id, .class)":
-            self.url_data[url] = {"selector": selector, "hash": None, "previous_content": None}
-            self.url_listbox.insert(tk.END, f"{url} - {selector}")
+            current_time = datetime.now().isoformat()
+            self.url_data[url] = {
+                "selector": selector,
+                "hash": None,
+                "previous_content": None,
+                "added_date": current_time,
+                "last_checked": None
+            }
+            self.url_listbox.insert(tk.END, f"{url} - {selector} (Added: {current_time})")
             self.url_entry.delete(0, tk.END)
             self.selector_entry.delete(0, tk.END)
             self.save_data()
@@ -107,15 +117,22 @@ class DiffAlerterApp:
             current_content = self.get_content(url, selector)
             if current_content is not None:
                 previous_content = data["previous_content"]
+                data["last_checked"] = datetime.now().isoformat()  # Update last checked time
                 if previous_content and current_content != previous_content:
-                    self.show_changes(url, previous_content, current_content)
-                # Update the content and hash for the next comparison
+                    self.show_changes(url, previous_content, current_content, data["added_date"], data["last_checked"])
+                # Update the content for the next comparison
                 self.url_data[url]["previous_content"] = current_content
         # Save updated data after each check
         self.save_data()
 
-    def show_changes(self, url, old_content, new_content):
-        changes = f"Changes detected for '{url}':\n\nOld Content:\n{old_content}\n\nNew Content:\n{new_content}"
+    def show_changes(self, url, old_content, new_content, added_date, last_checked):
+        changes = (
+            f"Changes detected for '{url}':\n\n"
+            f"• Added Date: {added_date}\n"
+            f"• Last Checked: {last_checked}\n\n"
+            f"• Old Content:\n{old_content}\n\n"
+            f"• New Content:\n{new_content}"
+        )
         messagebox.showinfo("Website Changed", changes)
 
     def save_data(self):
@@ -129,7 +146,12 @@ class DiffAlerterApp:
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
 
+    def populate_listbox(self):
+        """ Populate the Listbox with the URLs and selectors from the loaded data. """
+        for url, data in self.url_data.items():
+            self.url_listbox.insert(tk.END, f"{url} - {data['selector']} (Added: {data['added_date']})")
+
 # Create the Tkinter app
 root = tk.Tk()
-app = DiffAlerterApp(root)
+app = WebsiteMonitorApp(root)
 root.mainloop()
