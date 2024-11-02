@@ -1,12 +1,12 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox
 import requests
 import hashlib
 import json
 from bs4 import BeautifulSoup
 from threading import Thread
 
-class WebsiteMonitorApp:
+class DiffAlerterApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Website Change Monitor")
@@ -21,11 +21,15 @@ class WebsiteMonitorApp:
         # URL Entry and Add Button
         self.url_entry = tk.Entry(self.root, width=50)
         self.url_entry.insert(0, "Enter URL")
+        self.url_entry.bind("<FocusIn>", self.clear_placeholder)
+        self.url_entry.bind("<FocusOut>", self.set_placeholder)
         self.url_entry.pack(pady=5)
 
         # Selector Entry
         self.selector_entry = tk.Entry(self.root, width=50)
         self.selector_entry.insert(0, "Enter CSS Selector (e.g., #id, .class)")
+        self.selector_entry.bind("<FocusIn>", self.clear_placeholder_selector)
+        self.selector_entry.bind("<FocusOut>", self.set_placeholder_selector)
         self.selector_entry.pack(pady=5)
 
         # Buttons
@@ -44,10 +48,26 @@ class WebsiteMonitorApp:
         delete_button = tk.Button(self.root, text="Delete Selected URL", command=self.delete_url)
         delete_button.pack(pady=5)
 
+    def clear_placeholder(self, event):
+        if self.url_entry.get() == "Enter URL":
+            self.url_entry.delete(0, tk.END)
+
+    def set_placeholder(self, event):
+        if not self.url_entry.get():
+            self.url_entry.insert(0, "Enter URL")
+
+    def clear_placeholder_selector(self, event):
+        if self.selector_entry.get() == "Enter CSS Selector (e.g., #id, .class)":
+            self.selector_entry.delete(0, tk.END)
+
+    def set_placeholder_selector(self, event):
+        if not self.selector_entry.get():
+            self.selector_entry.insert(0, "Enter CSS Selector (e.g., #id, .class)")
+
     def add_url(self):
         url = self.url_entry.get().strip()
         selector = self.selector_entry.get().strip()
-        if url and selector:
+        if url and selector and url != "Enter URL" and selector != "Enter CSS Selector (e.g., #id, .class)":
             self.url_data[url] = {"selector": selector, "hash": None, "previous_content": None}
             self.url_listbox.insert(tk.END, f"{url} - {selector}")
             self.url_entry.delete(0, tk.END)
