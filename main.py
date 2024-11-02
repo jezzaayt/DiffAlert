@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from datetime import datetime
 
-class WebsiteMonitorApp:
+class DiffAlerterApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Website Change Monitor")
@@ -127,14 +127,42 @@ class WebsiteMonitorApp:
         self.save_data()
 
     def show_changes(self, url, old_content, new_content, added_date, last_checked):
-        changes = (
-            f"Changes detected for '{url}':\n\n"
-            f"• Added Date: {added_date}\n"
-            f"• Last Checked: {last_checked}\n\n"
-            f"• Old Content:\n{old_content}\n\n"
-            f"• New Content:\n{new_content}"
-        )
-        messagebox.showinfo("Website Changed", changes)
+        old_lines = set(old_content.splitlines())
+        new_lines = set(new_content.splitlines())
+        
+        added_lines = new_lines - old_lines
+        removed_lines = old_lines - new_lines
+
+        changes_window = tk.Toplevel(self.root)
+        changes_window.title("Website Changes")
+        changes_window.geometry("600x400")  # Set initial window size (width x height)
+
+        text_widget = tk.Text(changes_window, wrap="word", height=15, width=70)  # Set height and width
+        text_widget.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)  # Allow it to expand and fill
+
+        # Adding metadata
+        text_widget.insert(tk.END, f"Changes detected for '{url}':\n\n")
+        text_widget.insert(tk.END, f"• Added Date: {added_date}\n")
+        text_widget.insert(tk.END, f"• Last Checked: {last_checked}\n\n")
+
+        # Highlight differences
+        if removed_lines:
+            text_widget.insert(tk.END, "• Removed Content:\n")
+            for line in removed_lines:
+                text_widget.insert(tk.END, f"- {line}\n", "removed")
+            text_widget.insert(tk.END, "\n")
+        
+        if added_lines:
+            text_widget.insert(tk.END, "• Added Content:\n")
+            for line in added_lines:
+                text_widget.insert(tk.END, f"+ {line}\n", "added")
+            text_widget.insert(tk.END, "\n")
+
+        # Tag configurations for highlighting
+        text_widget.tag_config("removed", foreground="red")
+        text_widget.tag_config("added", foreground="green")
+
+        text_widget.config(state=tk.DISABLED)  # Make the text widget read-only
 
     def save_data(self):
         with open("url_data.json", "w") as file:
@@ -154,5 +182,5 @@ class WebsiteMonitorApp:
 
 # Create the Tkinter app
 root = tk.Tk()
-app = WebsiteMonitorApp(root)
+app = DiffAlerterApp(root)
 root.mainloop()
