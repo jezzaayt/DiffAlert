@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 import requests
 import hashlib
 import json
@@ -48,7 +48,7 @@ class WebsiteMonitorApp:
         url = self.url_entry.get().strip()
         selector = self.selector_entry.get().strip()
         if url and selector:
-            self.url_data[url] = {"selector": selector, "hash": None}
+            self.url_data[url] = {"selector": selector, "hash": None, "previous_content": None}
             self.url_listbox.insert(tk.END, f"{url} - {selector}")
             self.url_entry.delete(0, tk.END)
             self.selector_entry.delete(0, tk.END)
@@ -70,17 +70,13 @@ class WebsiteMonitorApp:
         monitor_thread.daemon = True
         monitor_thread.start()
 
-    def get_hash(self, url, selector):
+    def get_content(self, url, selector):
         try:
             response = requests.get(url)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             target_content = soup.select_one(selector)
-            if target_content:
-                return hashlib.md5(target_content.encode('utf-8')).hexdigest()
-            else:
-                print(f"Selector '{selector}' not found on {url}")
-                return None
+            return target_content.get_text(strip=True) if target_content else None
         except requests.RequestException as e:
             print(f"Error fetching {url}: {e}")
             return None
@@ -88,16 +84,19 @@ class WebsiteMonitorApp:
     def check_website_changes(self):
         for url, data in self.url_data.items():
             selector = data["selector"]
-            current_hash = self.get_hash(url, selector)
-            print(f"Checking {selector}) {current_hash}")
-            if current_hash:
-                previous_hash = data["hash"]
-                if previous_hash and current_hash != previous_hash:
-                    messagebox.showwarning("Website Changed", f"The website '{url}' with selector '{selector}' has changed!")
-                # Update the hash for the next comparison
-                self.url_data[url]["hash"] = current_hash
+            current_content = self.get_content(url, selector)
+            if current_content is not None:
+                previous_content = data["previous_content"]
+                if previous_content and current_content != previous_content:
+                    self.show_changes(url, previous_content, current_content)
+                # Update the content and hash for the next comparison
+                self.url_data[url]["previous_content"] = current_content
         # Save updated data after each check
         self.save_data()
+
+    def show_changes(self, url, old_content, new_content):
+        changes = f"Changes detected for '{url}':\n\nOld Content:\n{old_content}\n\nNew Content:\n{new_content}"
+        messagebox.showinfo("Website Changed", changes)
 
     def save_data(self):
         with open("url_data.json", "w") as file:
