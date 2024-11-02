@@ -5,11 +5,21 @@ import json
 from bs4 import BeautifulSoup
 from threading import Thread
 from datetime import datetime
-
+from tkinter import PhotoImage
+from PIL import Image, ImageTk
 class DiffAlerterApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Website Change Monitor")
+        self.root.title("Diff Alerter") 
+        # Set the icon using an .ico file located in the same folder
+        try:
+            # Attempt to load the icon
+            img = Image.open
+            icon_image = PhotoImage(file="icon.png")  # Ensure this matches your filename
+            root.wm_iconphoto(False, icon_image)  # Set the icon
+        except Exception as e:
+            print("Error loading icon:", e)
+        
         
         # Initialize site tracking data
         self.url_data = self.load_data()  # Dictionary to store URLs and selectors
@@ -137,8 +147,19 @@ class DiffAlerterApp:
         changes_window.title("Website Changes")
         changes_window.geometry("600x400")  # Set initial window size (width x height)
 
-        text_widget = tk.Text(changes_window, wrap="word", height=15, width=70)  # Set height and width
-        text_widget.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)  # Allow it to expand and fill
+        # Create a frame to hold the Text widget and scrollbar
+        frame = tk.Frame(changes_window)
+        frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+        # Create the Text widget
+        text_widget = tk.Text(frame, wrap="word", height=15, width=70)
+        text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Create a scrollbar and link it to the Text widget
+        scrollbar = tk.Scrollbar(frame, command=text_widget.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        text_widget['yscrollcommand'] = scrollbar.set
 
         # Adding metadata
         text_widget.insert(tk.END, f"Changes detected for '{url}':\n\n")
