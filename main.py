@@ -52,7 +52,6 @@ class DiffAlerterApp:
         # Listbox to display URLs
         self.url_listbox = tk.Listbox(self.root, width=70, height=10)
         self.url_listbox.pack(pady=10)
-
         # Check Changes Button
         check_button = tk.Button(self.root, text="Check for Changes", command=self.start_monitoring)
         check_button.pack(pady=5)
