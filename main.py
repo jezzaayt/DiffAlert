@@ -71,7 +71,7 @@ class WebsiteMonitorApp:
         url = self.url_entry.get().strip()
         selector = self.selector_entry.get().strip()
         if url and selector and url != "Enter URL" and selector != "Enter CSS Selector (e.g., #id, .class)":
-            current_time = datetime.now().isoformat()
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M")  # Format date without seconds
             self.url_data[url] = {
                 "selector": selector,
                 "hash": None,
@@ -84,6 +84,7 @@ class WebsiteMonitorApp:
             self.selector_entry.delete(0, tk.END)
             self.save_data()
             messagebox.showinfo("Success", f"URL '{url}' added with selector '{selector}'.")
+
 
     def delete_url(self):
         selected = self.url_listbox.curselection()
@@ -117,7 +118,7 @@ class WebsiteMonitorApp:
             current_content = self.get_content(url, selector)
             if current_content is not None:
                 previous_content = data["previous_content"]
-                data["last_checked"] = datetime.now().isoformat()  # Update last checked time
+                data["last_checked"] = datetime.now().strftime("%Y-%m-%d %H:%M")  # Format last checked without seconds
                 if previous_content and current_content != previous_content:
                     self.show_changes(url, previous_content, current_content, data["added_date"], data["last_checked"])
                 # Update the content for the next comparison
