@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 class DiffAlerterApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Diff Alerter") 
+        self.root.title("Website Diff Alerter") 
         # Set the icon using an .ico file located in the same folder
         try:
             # Attempt to load the icon
@@ -127,7 +127,6 @@ class DiffAlerterApp:
     # Get the current selection index
         selected = self.url_listbox.curselection()
         selected_index = selected[0] if selected else None  # Store the selected index
-        print(selected_index)
         # Only proceed if an item is selected
         if selected_index is not None:
             # Get the URL corresponding to the selected index
