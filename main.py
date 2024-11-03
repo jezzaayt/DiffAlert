@@ -124,26 +124,37 @@ class DiffAlerterApp:
 
     def check_website_changes(self):
         
-        for url, data in self.url_data.items():
-            added_date = datetime.fromisoformat(data['added_date']).date()  # Adjust format if necessary
+    # Get the current selection index
+        selected = self.url_listbox.curselection()
+        selected_index = selected[0] if selected else None  # Store the selected index
+        print(selected_index)
+        # Only proceed if an item is selected
+        if selected_index is not None:
+            # Get the URL corresponding to the selected index
+            url = list(self.url_data.keys())[selected_index]
+            data = self.url_data[url]  # Get the corresponding data for the selected URL
+            
             selector = data["selector"]
             current_content = self.get_content(url, selector)
+            
             if current_content is not None:
                 previous_content = data["previous_content"]
                 data["last_checked"] = datetime.now().strftime("%Y-%m-%d %H:%M")  # Format last checked without seconds
+                
                 if previous_content and current_content != previous_content:
                     self.show_changes(url, previous_content, current_content, data["added_date"], data["last_checked"])
+                    
                 # Update the content for the next comparison
-                self.url_data[url]["previous_content"] = current_content
+                data["previous_content"] = current_content  # Update the previous content
+
+
         # Save updated data after each check
-            if data['last_checked'] is not None:
-                    entry = f"{url} {data['selector']} (Added {added_date}) - {data['last_checked']}"
-            else:
-                entry = f"{url} - {data['selector']} (Added: {added_date})"
-            self.url_listbox.insert(tk.END, entry)
         self.save_data()
-        # delete previous to refresh the list
+
+        # Clear the Listbox before updating with new content
         self.url_listbox.delete(0, tk.END)
+
+        # Second loop to insert items into the Listbox
         for url, data in self.url_data.items():
             added_date = datetime.fromisoformat(data['added_date']).date()  # Adjust format if necessary
 
@@ -151,7 +162,14 @@ class DiffAlerterApp:
                 entry = f"{url} {data['selector']} (Added: {added_date}) - {data['last_checked']}"
             else:
                 entry = f"{url} - {data['selector']} (Added: {added_date})"
+
+            # Insert the entry into the Listbox
             self.url_listbox.insert(tk.END, entry)
+
+        # Reselect the previous selection, if it exists
+        if selected_index is not None and selected_index < self.url_listbox.size():
+            self.url_listbox.selection_set(selected_index)  # Reselect the previous index
+            self.url_listbox.activate(selected_index)
 
             
             
