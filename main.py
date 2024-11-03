@@ -88,7 +88,7 @@ class DiffAlerterApp:
                 "added_date": current_time,
                 "last_checked": None
             }
-            self.url_listbox.insert(tk.END, f"{url} - {selector} (Added: {current_time})")
+            self.url_listbox.insert(tk.END, f"{url} - {selector} (Added: {current_time}) ")
             self.url_entry.delete(0, tk.END)
             self.selector_entry.delete(0, tk.END)
             self.save_data()
@@ -198,7 +198,15 @@ class DiffAlerterApp:
     def populate_listbox(self):
         """ Populate the Listbox with the URLs and selectors from the loaded data. """
         for url, data in self.url_data.items():
-            self.url_listbox.insert(tk.END, f"{url} - {data['selector']} (Added: {data['added_date']})")
+            added_date = datetime.fromisoformat(data['added_date']).date()  # Adjust format if necessary
+
+            if data['last_checked'] is not None:
+                entry = f"{url} {data['selector']} (Added {added_date}) - {data['last_checked']}"
+            else:
+                entry = f"{url} - {data['selector']} (Added: {added_date})"
+
+            # Insert the entry into the Listbox
+            self.url_listbox.insert(tk.END, entry)
 
 # Create the Tkinter app
 root = tk.Tk()
