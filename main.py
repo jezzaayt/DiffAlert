@@ -1,7 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox
 import requests
 import json
+from tkinter import messagebox
 from bs4 import BeautifulSoup
 from threading import Thread
 from datetime import datetime
@@ -14,7 +14,6 @@ class DiffAlerterApp:
         # Set the icon using an .ico file located in the same folder
         try:
             # Attempt to load the icon
-            img = Image.open
             icon_image = PhotoImage(file="icon.png")  # Ensure this matches your filename
             root.wm_iconphoto(False, icon_image)  # Set the icon
         except Exception as e:
@@ -29,6 +28,7 @@ class DiffAlerterApp:
         
         # Populate Listbox with loaded data
         self.populate_listbox()
+        
 
     def create_widgets(self):
         # URL Entry and Add Button
