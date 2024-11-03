@@ -195,7 +195,7 @@ class DiffAlerterApp:
         changes_window = tk.Toplevel(self.root)
         changes_window.title("Website Changes")
         changes_window.geometry("600x400")  # Set initial window size (width x height)
-       
+        changes_window.bind("<Escape>", lambda event: changes_window.destroy())
 
 
         # Create a frame to hold the Text widget and scrollbar
