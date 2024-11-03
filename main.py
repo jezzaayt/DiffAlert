@@ -110,6 +110,7 @@ class DiffAlerterApp:
         monitor_thread.daemon = True
         monitor_thread.start()
 
+
     def get_content(self, url, selector):
         try:
             response = requests.get(url)
@@ -122,7 +123,9 @@ class DiffAlerterApp:
             return None
 
     def check_website_changes(self):
+        
         for url, data in self.url_data.items():
+            added_date = datetime.fromisoformat(data['added_date']).date()  # Adjust format if necessary
             selector = data["selector"]
             current_content = self.get_content(url, selector)
             if current_content is not None:
@@ -133,7 +136,25 @@ class DiffAlerterApp:
                 # Update the content for the next comparison
                 self.url_data[url]["previous_content"] = current_content
         # Save updated data after each check
+            if data['last_checked'] is not None:
+                    entry = f"{url} {data['selector']} (Added {added_date}) - {data['last_checked']}"
+            else:
+                entry = f"{url} - {data['selector']} (Added: {added_date})"
+            self.url_listbox.insert(tk.END, entry)
         self.save_data()
+        # delete previous to refresh the list
+        self.url_listbox.delete(0, tk.END)
+        for url, data in self.url_data.items():
+            added_date = datetime.fromisoformat(data['added_date']).date()  # Adjust format if necessary
+
+            if data['last_checked'] is not None:
+                entry = f"{url} {data['selector']} (Added: {added_date}) - {data['last_checked']}"
+            else:
+                entry = f"{url} - {data['selector']} (Added: {added_date})"
+            self.url_listbox.insert(tk.END, entry)
+
+            
+            
 
     def show_changes(self, url, old_content, new_content, added_date, last_checked):
         old_lines = set(old_content.splitlines())
