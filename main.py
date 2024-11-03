@@ -1,12 +1,14 @@
 import tkinter as tk
 import requests
 import json
+import base64
 from tkinter import messagebox
 from bs4 import BeautifulSoup
 from threading import Thread
 from datetime import datetime
 from tkinter import PhotoImage
 from PIL import Image, ImageTk
+
 class DiffAlerterApp:
     def __init__(self, root):
         self.root = root
@@ -18,8 +20,6 @@ class DiffAlerterApp:
             root.wm_iconphoto(False, icon_image)  # Set the icon
         except Exception as e:
             print("Error loading icon:", e)
-        
-        
         # Initialize site tracking data
         self.url_data = self.load_data()  # Dictionary to store URLs and selectors
         
