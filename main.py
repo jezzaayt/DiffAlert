@@ -48,10 +48,15 @@ class DiffAlerterApp:
         # Buttons
         add_button = tk.Button(self.root, text="Add URL", command=self.add_url)
         add_button.pack()
-
+        listbox_frame = tk.Frame(self.root)
+        listbox_frame.pack(pady=10)
         # Listbox to display URLs
-        self.url_listbox = tk.Listbox(self.root, width=70, height=10)
-        self.url_listbox.pack(pady=10)
+        self.url_listbox = tk.Listbox(listbox_frame, width=70, height=10)
+        self.url_listbox.pack(pady=10, side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar = tk.Scrollbar(listbox_frame, command=self.url_listbox.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.url_listbox['yscrollcommand'] = scrollbar.set
+        scrollbar.config(command=self.url_listbox.yview)
         # Check Changes Button
         check_button = tk.Button(self.root, text="Check for Changes", command=self.start_monitoring)
         check_button.pack(pady=5)
