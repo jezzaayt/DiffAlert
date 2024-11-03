@@ -114,13 +114,17 @@ class DiffAlerterApp:
     def get_content(self, url, selector):
         try:
             response = requests.get(url)
-            response.raise_for_status()
+            response.raise_for_status()  # Raises an HTTPError for bad responses (4xx and 5xx)
+            
+            # Check for specific status codes
+            if response.status_code == 429:
+                return None, "Error 429: Too Many Requests. Please try again later."
             soup = BeautifulSoup(response.text, 'html.parser')
             target_content = soup.select_one(selector)
-            return target_content.get_text(strip=True) if target_content else None
+            return target_content.get_text(strip=True) if target_content else None, None
         except requests.RequestException as e:
             print(f"Error fetching {url}: {e}")
-            return None
+            return None, f"Error fetching {url}: {e}"
 
     def check_website_changes(self):
         
@@ -132,9 +136,9 @@ class DiffAlerterApp:
             # Get the URL corresponding to the selected index
             url = list(self.url_data.keys())[selected_index]
             data = self.url_data[url]  # Get the corresponding data for the selected URL
-            
+
             selector = data["selector"]
-            current_content = self.get_content(url, selector)
+            current_content, error_message = self.get_content(url, selector)
             
             if current_content is not None:
                 previous_content = data["previous_content"]
@@ -147,6 +151,12 @@ class DiffAlerterApp:
                     
                 # Update the content for the next comparison
                 data["previous_content"] = current_content  # Update the previous content
+            else:
+                # Handle case where content could not be fetched
+                if error_message:
+                
+                    self.show_changes(url, error_message, "", data["added_date"], data["last_checked"])
+                data["content_changed"] = False  # No change detected due to error
 
 
         # Save updated data after each check
@@ -210,13 +220,14 @@ class DiffAlerterApp:
        
         # Highlight differences
         if removed_lines:
-            text_widget.insert(tk.END, "• Removed Content:\n")
+            if new_content != "":
+                text_widget.insert(tk.END, "• Removed Content:\n")
             for line in removed_lines:
                 text_widget.insert(tk.END, f"- {line}\n", "removed")
             text_widget.insert(tk.END, "\n")
         
         if added_lines:
-            if new_content != "No Changes":
+            if new_content != "No Changes" or new_content == "": 
                 text_widget.insert(tk.END, "• Added Content:\n")
             for line in added_lines:
                 text_widget.insert(tk.END, f"+ {line}\n", "added")
