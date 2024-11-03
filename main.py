@@ -142,6 +142,8 @@ class DiffAlerterApp:
                 
                 if previous_content and current_content != previous_content:
                     self.show_changes(url, previous_content, current_content, data["added_date"], data["last_checked"])
+                else:
+                    self.show_changes(url, "", "No Changes", data["added_date"], data["last_checked"])
                     
                 # Update the content for the next comparison
                 data["previous_content"] = current_content  # Update the previous content
@@ -183,6 +185,8 @@ class DiffAlerterApp:
         changes_window = tk.Toplevel(self.root)
         changes_window.title("Website Changes")
         changes_window.geometry("600x400")  # Set initial window size (width x height)
+       
+
 
         # Create a frame to hold the Text widget and scrollbar
         frame = tk.Frame(changes_window)
@@ -199,10 +203,11 @@ class DiffAlerterApp:
         text_widget['yscrollcommand'] = scrollbar.set
 
         # Adding metadata
+        
         text_widget.insert(tk.END, f"Changes detected for '{url}':\n\n")
         text_widget.insert(tk.END, f"• Added Date: {added_date}\n")
         text_widget.insert(tk.END, f"• Last Checked: {last_checked}\n\n")
-
+       
         # Highlight differences
         if removed_lines:
             text_widget.insert(tk.END, "• Removed Content:\n")
@@ -211,7 +216,8 @@ class DiffAlerterApp:
             text_widget.insert(tk.END, "\n")
         
         if added_lines:
-            text_widget.insert(tk.END, "• Added Content:\n")
+            if new_content != "No Changes":
+                text_widget.insert(tk.END, "• Added Content:\n")
             for line in added_lines:
                 text_widget.insert(tk.END, f"+ {line}\n", "added")
             text_widget.insert(tk.END, "\n")
@@ -228,7 +234,7 @@ class DiffAlerterApp:
 
     def load_data(self):
         try:
-            with open("url_data.json", "r") as file:
+            with open("url_data.json", "r", encoding="utf-8") as file:
                 return json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
