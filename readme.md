@@ -1,3 +1,6 @@
+Was looking at this with Tkinter, switched it over to Flask over on this repo [Update Insight](https://github.com/jezzaayt/UpdateInsight)
+
+
 # Readme
 DiffAlerterApp is a simple application designed to monitor changes on specified websites. By regularly checking the content of a website, it alerts users to any modifications, ensuring that you stay informed about important updates.
 
@@ -13,12 +16,3 @@ DiffAlerterApp is a simple application designed to monitor changes on specified 
 - Tkinter (comes pre-installed with Python)
 - Requests library
 - BeautifulSoup library
-
-## Usage
-
-    Open the Application: Launch the DiffAlerterApp from your Python environment or directly if you have an executable.
-
-    Add a Website URL: Enter the URL of the website you wish to monitor in the provided input field. This is added into the list. 
-
-    Click the check website when the URL is selected
-
